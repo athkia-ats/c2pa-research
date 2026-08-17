@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#000000">
+  <title>Content Credentials Prototype</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #000; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+    body { display: flex; justify-content: center; align-items: center; overflow-x: hidden; }
+    .phone { position: relative; width: min(100vw, 853px); }
+    .feed { display: block; width: 100%; height: auto; user-select: none; -webkit-user-drag: none; }
+    .cred-hotspot {
+      position: absolute;
+      left: 2.8%; top: 9.3%; width: 92.0%; height: 7.4%;
+      border: 0; background: transparent; cursor: pointer; padding: 0;
+    }
+    .cred-hotspot:focus-visible { outline: 2px solid #39a9ff; outline-offset: 2px; border-radius: 18px; }
+    .overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,.72); display: none;
+      align-items: center; justify-content: center; padding: 18px; z-index: 20;
+    }
+    .overlay.open { display: flex; }
+    .dialog {
+      width: min(720px, 96vw); max-height: 90vh; overflow: auto;
+      background: #101112; color: #fff; border: 1px solid #3a3d40; border-radius: 24px;
+      box-shadow: 0 24px 80px rgba(0,0,0,.6); padding: 22px 20px 18px;
+    }
+    .dialog-head { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+    .title-row { display: flex; align-items: center; gap: 10px; }
+    h1 { margin: 0; font-size: clamp(22px, 4vw, 34px); line-height: 1.1; }
+    .verified { display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border: 1px solid #4b545f; border-radius: 999px; color: #39a9ff; font-weight: 700; font-size: 14px; }
+    .verified-dot { width: 16px; height: 16px; border-radius: 50%; background: #168cff; color: #fff; display: inline-flex; align-items: center; justify-content: center; font-size: 11px; }
+    .close { border: 0; background: transparent; color: #fff; font-size: 34px; line-height: 1; cursor: pointer; padding: 0 4px; }
+    .timeline { position: relative; margin-top: 18px; padding-left: 66px; }
+    .timeline:before { content: ""; position: absolute; left: 18px; top: 10px; bottom: 24px; width: 4px; background: linear-gradient(#dcecff 0 65%, transparent 65%); border-radius: 4px; }
+    .entry { position: relative; padding: 0 0 24px; margin-bottom: 20px; border-bottom: 1px solid #34373a; }
+    .entry:last-child { border-bottom: 0; margin-bottom: 0; padding-bottom: 8px; }
+    .node { position: absolute; left: -57px; top: 6px; width: 20px; height: 20px; border: 4px solid #dcecff; border-radius: 50%; background: #101112; }
+    .node.active { border-color: #dcecff; box-shadow: 0 0 0 4px #ff9d00 inset; }
+    .entry-top { display: flex; gap: 14px; align-items: flex-start; }
+    .thumb { width: 66px; height: 66px; border-radius: 6px; border: 1px solid #60666d; object-fit: cover; background: #1b1e20; flex: 0 0 auto; }
+    .entry h2 { margin: 2px 0 5px; font-size: 20px; }
+    .meta { color: #c9d0d7; font-size: 17px; margin: 0 0 7px; }
+    .detail { color: #f2f3f4; font-size: 17px; line-height: 1.35; margin: 0; }
+    .location { margin-top: 8px; font-weight: 700; }
+    .view-more { width: 100%; border: 0; border-radius: 999px; background: #2b2e31; color: #fff; font-size: 20px; font-weight: 600; padding: 15px 20px; margin-top: 6px; cursor: pointer; }
+    @media (max-width: 640px) {
+      .dialog { border-radius: 20px; padding: 18px 14px 14px; }
+      .timeline { padding-left: 52px; }
+      .timeline:before { left: 14px; }
+      .node { left: -49px; }
+      .thumb { width: 56px; height: 56px; }
+      .entry h2 { font-size: 17px; }
+      .meta, .detail { font-size: 15px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="phone" aria-label="Social feed prototype">
+    <img class="feed" src="assets/feed.png" alt="Social media feed prototype">
+    <button class="cred-hotspot" aria-label="Open Content Credentials history"></button>
+  </main>
+
+  <div class="overlay" id="credentialsOverlay" role="dialog" aria-modal="true" aria-labelledby="credentialsTitle">
+    <section class="dialog">
+      <div class="dialog-head">
+        <div class="title-row">
+          <h1 id="credentialsTitle">Content Credentials</h1>
+          <span class="verified"><span class="verified-dot">✓</span>Verified</span>
+        </div>
+        <button class="close" id="closeDialog" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="timeline">
+        <article class="entry">
+          <span class="node"></span>
+          <div class="entry-top">
+            <img class="thumb" src="assets/feed.png" alt="Source preview">
+            <div>
+              <h2>Global Desk</h2>
+              <p class="meta">8/17/2026 at 9:14 AM</p>
+              <p class="detail">• Original publication</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="entry">
+          <span class="node active"></span>
+          <div class="entry-top">
+            <img class="thumb" src="assets/feed.png" alt="Edited preview">
+            <div>
+              <h2>Edited: Layout adjustments</h2>
+              <p class="meta">8/17/2026 at 9:31 AM</p>
+              <p class="detail">• Headline placement and visual elements adjusted</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="entry">
+          <span class="node"></span>
+          <div class="entry-top">
+            <img class="thumb" src="assets/feed.png" alt="Final preview">
+            <div>
+              <h2>OpenAI</h2>
+              <p class="meta">8/17/2026 at 9:36 AM</p>
+              <p class="detail location">Location: New York, USA</p>
+            </div>
+          </div>
+        </article>
+      </div>
+
+      <button class="view-more" type="button">View more</button>
+    </section>
+  </div>
+
+  <script>
+    const overlay = document.getElementById('credentialsOverlay');
+    const hotspot = document.querySelector('.cred-hotspot');
+    const close = document.getElementById('closeDialog');
+    const openDialog = () => { overlay.classList.add('open'); close.focus(); };
+    const closeDialog = () => { overlay.classList.remove('open'); hotspot.focus(); };
+    hotspot.addEventListener('click', openDialog);
+    close.addEventListener('click', closeDialog);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeDialog(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && overlay.classList.contains('open')) closeDialog(); });
+  </script>
+</body>
+</html>
